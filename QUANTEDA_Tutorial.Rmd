@@ -1,0 +1,162 @@
+---
+title: "tutorials.quanteda.io"
+author: "Michael G Harpole"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# RADING IN DATA
+
+## PRE-FORMATTED FILES
+
+
+```{r}
+require(quanteda)
+require(readtext)
+```
+
+First, we will show you how to import pre-formatted files that come in a “spreadsheet format”. path_data is the location of sample files on your computer that come with the readtext package.
+
+```{r }
+path_data <- system.file("extdata/", package = "readtext")
+```
+
+If your text data is stored in a pre-formatted file where one column contains the text and additional columns might store document-level variables (e.g. year, author, or language), you can use read.csv() to import.
+
+```{r}
+dat_inaug <- read.csv(paste0(path_data, "/csv/inaugCorpus.csv"))
+```
+
+Alternatively, you can use the readtext package to import character (comma- or tab-separated) values. readtext reads files containing text, along with any associated document-level variables.
+
+```{r}
+dat_dail <- readtext(paste0(path_data, "/tsv/dailsample.tsv"), text_field = "speech")
+```
+
+## MULTIPLE TEXT FILES
+
+A second option to import data is to load multiple text files at once that are stored in the same folder or subfolders. Again, path_data is the location of sample files on your computer.
+```{r}
+path_data <- system.file("extdata/", package = "readtext")
+```
+
+Unlike the pre-formatted files, individual text files usually do not contain document-level variables. However, you can create document-level variables using the readtext package.
+
+The directory /txt/UDHR contains text files (".txt”) of the Universal Declaration of Human Rights in 13 languages.
+```{r}
+dat_udhr <- readtext(paste0(path_data, "/txt/UDHR/*"))
+```
+You can generate document-level variables based on the file names using the docvarnames and docvarsfrom argument. dvsep = "_" specifies the value separator in the filenames.encoding = "ISO-8859-1" determines character encodings of the texts.
+
+```{r}
+dat_eu <- readtext(paste0(path_data, "/txt/EU_manifestos/*.txt"),
+                    docvarsfrom = "filenames", 
+                    docvarnames = c("unit", "context", "year", "language", "party"),
+                    dvsep = "_", 
+                    encoding = "ISO-8859-1")
+str(dat_eu)
+```
+
+## JSON
+
+You can also read JSON files (.json) downloaded from the Twititer stream API. twitter.json is located in data directory of this tutorial package.
+
+```{r}
+dat_twitter <- readtext("../data/twitter.json", source = "twitter")
+```
+
+The file comes with several metadata for each tweet, such as the number of retweets and likes, the username, time and time zone.
+
+```{r}
+head(names(dat_twitter))
+```
+
+## PDF
+
+readtext() can also convert and read PDF (".pdf”) files.
+```{r}
+dat_udhr <- readtext(paste0(path_data, "/pdf/UDHR/*.pdf"), 
+                      docvarsfrom = "filenames", 
+                      docvarnames = c("document", "language"),
+                      sep = "_")
+```
+
+## Microsoft Word
+
+Finally, readtext() can import Microsoft Word (".doc” and “.docx”) files.
+```{r}
+dat_word <- readtext(paste0(path_data, "/word/*.docx"))
+```
+
+## DIFFERENT ENCODINGS
+
+Even if files are not saved in UTF-8, you can extract information on character encoding from the file names and import the texts correctly.
+
+temp_dir contains the example files in various character encodings.
+
+```{r}
+path_temp <- tempdir()
+unzip(system.file("extdata", "data_files_encodedtexts.zip", package = "readtext"), exdir = path_temp)
+```
+
+list.files() returns names of all the text files (".txt”) in the directory
+```{r}
+filename <- list.files(path_temp, "^(Indian|UDHR_).*\\.txt$")
+head(filename)
+```
+
+You can extract character encoding information from the file names using R’s basic commands.
+
+```{r}
+filename <- gsub(".txt$", "", filename)
+encoding <- sapply(strsplit(filename, "_"), "[", 3)
+head(encoding)
+```
+
+There is a character encoding not supported by R.
+
+```{r}
+setdiff(encoding, iconvlist())
+```
+
+You then pass encoding to readtext() to convert various character encodings into UTF-8.
+
+```{r}
+path_data <- system.file("extdata/", package = "readtext")
+dat_txt <- readtext(paste0(path_data, "/data_files_encodedtexts.zip"), 
+                     encoding = encoding,
+                     docvarsfrom = "filenames", 
+                     docvarnames = c("document", "language", "input_encoding"))
+print(dat_txt, n = 50)
+```
+
+# BASICS OPERATIONS
+
+## Creating a CORPUS
+You can create a corpus from various available sources:
+
+A character vector consisting of one document per element
+
+A data frame consisting of a character vector for documents, and additional vectors for document-level variables
+
+A VCorpus or SimpleCorpus class object created by the tm package
+
+## Character vector
+
+data_char_ukimmig2010 is a named character vector and consists of sections of British election manifestos on immigration and asylum.
+
+```{r}
+corp_immig <- corpus(data_char_ukimmig2010, 
+                     docvars = data.frame(party = names(data_char_ukimmig2010)))
+print(corp_immig)
+summary(corp_immig)
+```
+
+```{r}
+sessionInfo()
+```
+

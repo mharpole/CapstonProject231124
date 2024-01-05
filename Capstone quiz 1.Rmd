@@ -1,0 +1,110 @@
+---
+title: "Capstone quiz 1"
+author: "Michael G Harpole"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r readin, cache=TRUE}
+en_US_Blogs <- read_lines("final/en_US/en_US.blogs.txt" )
+summary(en_US_Blogs)
+en_US_news <- read_lines("final/en_US/en_US.news.txt")
+summary(en_US_news)
+en_us_twitter <- read_lines("final/en_US/en_US.twitter.txt")
+summary(en_us_twitter)
+
+
+```
+```{r}
+# Specify the path to your text file
+file_path <- "final/en_US/en_US.blogs.txt"
+
+# Initialize a variable to keep track of the maximum line length
+max_line_length <- 0
+
+# Open the file connection
+con <- file(file_path, "r")
+
+# Read the file line by line
+while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
+  # Update max_line_length if the current line is longer
+  max_line_length <- max(max_line_length, nchar(line))
+}
+
+# Close the file connection
+close(con)
+
+# Print the result
+cat("The longest line in the en_US.blogs.txt file has", max_line_length, "characters.\n")
+
+```
+```{r}
+# Specify the path to your text file
+file_path <- "final/en_US/en_US.news.txt"
+
+# Initialize a variable to keep track of the maximum line length
+max_line_length <- 0
+
+# Open the file connection
+con <- file(file_path, "r")
+
+# Read the file line by line
+while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
+  # Update max_line_length if the current line is longer
+  max_line_length <- max(max_line_length, nchar(line))
+}
+
+# Close the file connection
+close(con)
+
+# Print the result
+cat("The longest line in the en_US.New.txt file has", max_line_length, "characters.\n")
+```
+```{r}
+# Specify the path to your text file
+file_path <- "final/en_US/en_US.twitter.txt"
+
+# Initialize a variable to keep track of the maximum line length
+max_line_length <- 0
+
+# Open the file connection
+con <- file(file_path, "r")
+
+# Read the file line by line
+while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
+  # Update max_line_length if the current line is longer
+  max_line_length <- max(max_line_length, nchar(line))
+}
+
+# Close the file connection
+close(con)
+
+# Print the result
+cat("The longest line in the en_US.twitter.txt file has", max_line_length, "characters.\n")
+
+```
+
+In the en_US twitter data set, if you dived the number of lines where the word "love" occures by the number of the times the word hate appers.
+```{r}
+LoveCount <-sum(str_detect(en_us_twitter,"love"))
+hateCount <- sum(str_detect(en_us_twitter,"hate"))
+LoveCount/hateCount
+```
+The one tweet in the en_US twitter set that matches the word "biostats" says what?
+```{r}
+en_us_twitter <- read_lines("final/en_US/en_US.twitter.txt")
+en_us_twitter %>% str_detect("biostats")
+
+```
+How many tweets have the exact characters "A computer once beat me at chess, but it was no match for me at kickboxing"
+```{r}
+en_us_twitter <- read_lines("final/en_US/en_US.twitter.txt")
+en_us_twitter %>% str_detect("A computer once beat me at chess, but it was no match for me at kickboxing") %>% sum()
+```
+
+
