@@ -2,34 +2,103 @@
 title: "CapStone Milestone Report"
 author: "Michael G Harpole"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Read Data in and convert to quantenda corpus
+## Read in Data
 
-```{r}
-library(tidyverse);library(quanteda);library(readtext)
-data_text <- readtext("/Users/michael/CapstonProject231124/final/en_US/*")
-text_corpus <- corpus(data_text)
+We have three files containg text from twitter, blog posts and news articles.
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse);library(quanteda);library(quanteda.textplots);library(quanteda.textstats)
+set.seed(240101)
+twitter_data <- read_lines("./en_US/en_US.twitter.txt")
+blog_data <- read_lines("./en_US/en_US.blogs.txt")
+news_data <- read_lines("./en_US/en_US.news.txt")
 ```
 
-## Tokenize, remove punctuation and end lines
+## Check size of data sets
+```{r, results='asis'}
+length_twitter <- length(twitter_data)
+length_news <- length(news_data)
+length_blog <- length(blog_data)
+words_twitter <- sum(str_count(twitter_data))
+words_news <- sum(str_count(news_data))
+words_blog <- sum(str_count(blog_data))
+lenght_summary <- paste(
+    "Total Amount of lines in each dataset.\n",
+    "Twitter length:\t ",
+    format(length_twitter,big.mark=",",scientific=FALSE),
+    "\nNews length:\t\t ",
+    format(length_news,big.mark=",",scientific=FALSE),
+    "\nBlog Length:\t\t",
+    format(length_blog,big.mark=",",scientific=FALSE),
+    "\n"
+    )
+Word_summary <- paste(
+   "Approximate number of words in each dataset.\n",
+    "Twitter length:\t ",
+    format(words_twitter,big.mark=",",scientific=FALSE),
+    "\nNews length:\t\t ",
+    format(words_news,big.mark=",",scientific=FALSE),
+    "\nBlog Length:\t\t",
+    format(words_blog,big.mark=",",scientific=FALSE)
+    )
+cat(lenght_summary)
+cat(Word_summary)
+```
 
+## Tokenize Data
+
+The quanteda R package was utilized to generate word tokens and also remove punctuation, symbols, separators, URL, and english articles.
 ```{r}
-Text_Tokens <- tokens(text_corpus, remove_punct = TRUE) %>%
+my_Text_Tokens <- tokens(c(blog_data,twitter_data,news_data),
+                         remove_symbols = TRUE,
+                         remove_punct = TRUE,
+                         remove_numbers = TRUE,
+                         remove_separators = TRUE,
+                         remove_url =TRUE
+                         ) %>%
 tokens_tolower() %>%
-tokens_remove(stopwords("english"), padding = FALSE)
-
+tokens_remove(stopwords(source = "smart"), padding = FALSE)
 ```
 
-## 
+## Create document-feature matrix
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Quanteda was then utilized to generate a document feature matrix to help examine the frequency of each of the words
+```{r}
+my_feature_matrix <- dfm(my_Text_Tokens)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Create barplot and a word cloud to examine features
+
+Next a plot of the top 20 words found in the compiled data set were plotted against the frequency of them occurring. Additionally a word cloud was generated to present the data in another manner to can insight of the words utilized.
+```{r, warning=FALSE}
+my_feature_matrix %>% 
+  textstat_frequency(n=20) %>% 
+  ggplot(aes(x=frequency,y= reorder(feature, frequency))) +
+  geom_point() +
+  labs(x = "Frequency", y = "Feature")+
+  theme_minimal()+
+  ggtitle("Top 20 Word frequency")
+
+my_feature_matrix %>% 
+  textplot_wordcloud()
+```
+
+The amount of data may be an issue when utilizing the feature matrix for a prediction model. A sampleing of the final feature matrix or of the initial data may be required. The computer utilized to generate this intial analysis had 16 threads and 64 Gb of RAM and the free shiny servers are limited to 1 gb ram.
+
+
+## Session Information
+```{r}
+sessionInfo()
+```
+
+
+
+
