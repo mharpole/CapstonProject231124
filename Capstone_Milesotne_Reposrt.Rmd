@@ -94,6 +94,28 @@ my_feature_matrix %>%
 The amount of data may be an issue when utilizing the feature matrix for a prediction model. A sampleing of the final feature matrix or of the initial data may be required. The computer utilized to generate this intial analysis had 16 threads and 64 Gb of RAM and the free shiny servers are limited to 1 gb ram.
 
 
+## Lets try and make some bigrams, trigrams and quatrograms
+```{r}
+my_bi_grams <- my_Text_Tokens %>% 
+  tokens_ngrams(n=2) %>% 
+  dfm()
+my_tri_grams <-  my_Text_Tokens %>% 
+  tokens_ngrams(n=3) %>% 
+  dfm()
+my_quad_grams <-  my_Text_Tokens %>% 
+  tokens_ngrams(n=4) %>% 
+  dfm()
+```
+
+## Lets look at the ngram frequencies
+```{r}
+bi_gram_frequency <- my_bi_grams %>% 
+  textstat_frequency()
+
+```
+
+
+
 ## Session Information
 ```{r}
 sessionInfo()
