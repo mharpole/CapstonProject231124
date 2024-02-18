@@ -9,7 +9,7 @@ en_US/
 
 # User-specific files
 .Ruserdata
-
+Test_predict.R
 # Example code in package build process
 *-Ex.R
 
